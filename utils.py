@@ -29,17 +29,27 @@ def reliable_send(target, data):
 
 help_message = '''
 targets: List all connections to the server
-session [n]:    Connect to a session. Once connected the you can esecute commands on the client machine. 
-                Send "q" to return to control center without stopping the connection. Send "close" to disconnect the client.
+session [n]:    Connect to a session. Once connected the you can esecute commands on the client machine.
 sendall [command]: Send a command to all the connected clients
-screenshot: Take a screenshot on the client machine
-start [command]: Start a program without blocking the shell
-get [url]: Download a file from the internet
 exit: Turn off the server and close all connections
 help: Show this message
 
 '''
 
+shell_help_message = '''
+q: Exit the shell but leave client connection open
+close: Close client connection
+download [filename]: Get a file from the client's machine
+upload [filename]: Upload a file to the client's machine
+get [command]: Start a program without blocking the shell
+screenshot: Take a screenshot on the client machine
+start [command]: Start a program without blocking the shell
+get [url]: Download a file from the internet
+help-shell: Show this message
+
+Any other commands will be executed by the client's default shell
+
+'''
 
 def start_shell(target_socket, target_ip):
     while True:

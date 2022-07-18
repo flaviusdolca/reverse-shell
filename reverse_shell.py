@@ -100,6 +100,8 @@ def shell(sock):
             except Exception as e:
                 print(e)
                 result = f"Error while trying to start '{cmd[6:]}'"
+        elif cmd == "help-shell": 
+            result = utils.shell_help_message
         else:
             try:
                 proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,

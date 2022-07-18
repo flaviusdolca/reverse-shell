@@ -45,8 +45,6 @@ def start_shell(target_socket,target_ip):
                 break
             elif cmd == "close":
                 target_socket.close()
-                targets.remove(target_socket)
-                ips.remove(target_ip)
                 break
             elif cmd[:8] == "download":
                 file_data = receive_frame(target_socket)

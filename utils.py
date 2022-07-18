@@ -28,7 +28,10 @@ targets: List all connections to the server
 session [n]:    Connect to a session. Once connected the you can esecute commands on the client machine. 
                 Send "q" to return to control center without stopping the connection. Send "close" to disconnect the client.
 sendall [command]: Send a command to all the connected clients
-close: Turn off the server and close all connections
+screenshot: Take a screenshot on the client machine
+start [command]: Start a program without blocking the shell
+get [url]: Download a file from the internet
+exit: Turn off the server and close all connections
 help: Show this message
 
 '''

@@ -13,6 +13,6 @@ s.listen(1)
 print("Listening for connections")
 
 target, ip = s.accept()
-print("Connection established from %s" % str(ip))
+print(f"Connection established from {ip}" )
 utils.start_shell(target,ip)
 s.close()

